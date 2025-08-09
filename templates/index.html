@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+{% block title %}Mark - Creative Email Marketing{% endblock %}
+
+{% block head %}
+    <style>
+        /* Aurora Background & Grid Overlay - Red Tint */
+        .main-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(229, 9, 20, 0.3), transparent),
+            radial-gradient(ellipse 80% 80% at 80% 50%, rgba(255, 105, 97, 0.2), transparent),
+            radial-gradient(ellipse 80% 80% at 20% 50%, rgba(229, 9, 20, 0.2), transparent);
+            animation: aurora 15s linear infinite;
+            z-index: -2;
+        }
+
+        /* --- THIS IS THE RESTORED "BOX" / GRID PATTERN --- */
+        .main-container::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+        }
+
+        @keyframes aurora {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Header & Navigation - Logo Integrated */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 0;
+            z-index: 1000;
+            transition: background 0.3s ease, border-bottom 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 50px;
+            height: auto;
+        }
+
+        .nav-brand-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-text);
+        }
+
+        .nav-links a {
+            color: var(--secondary-text);
+            text-decoration: none;
+            margin-left: 32px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-text);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 24px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-title {
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #FFFFFF 60%, var(--primary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin: 0 auto 32px auto;
+        }
+
+        /* General Section Styling */
+        .section-wrapper {
+            max-width: 1200px;
+            margin: 150px auto;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            color: var(--primary-text);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin: 16px auto 0;
+        }
+
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--surface-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            color: var(--secondary-text);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            align-items: center;
+        }
+
+        .pricing-card {
+            background: var(--surface-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pricing-card.popular {
+            transform: scale(1.05);
+            border-color: var(--primary-accent);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .plan-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .plan-price {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .plan-price span {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--secondary-text);
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 32px 0;
+            text-align: left;
+        }
+
+        .plan-features li {
+            margin-bottom: 12px;
+        }
+
+        /* CTA Section */
+        .cta-card {
+            background: #d9000d; /* Red gradient or solid */
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 12px;
+            color: white;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .cta-card h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .cta-card p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background-color: #333;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 50px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            margin-top: 100px;
+            color: var(--secondary-text);
+        }
+
+        .footer p {
+            font-size: 14px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="main-container">
+        <header class="header" id="mainHeader">
+            <nav class="nav-container">
+                <a href="{{ url_for('index') }}" class="nav-brand">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Mark Logo" class="nav-logo">
+                    <span class="nav-brand-text">MARK</span>
+                </a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="{{ url_for('login') }}">Login</a>
+                </div>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started Free</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero-section">
+                <div class="hero-content reveal">
+                    <h1 class="hero-title">The Modern Platform for Intelligent Email Marketing</h1>
+                    <p class="hero-subtitle">Move beyond simple campaigns. Use our powerful tools to automate,
+                        personalize, and analyze your way to incredible growth.</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary"
+                       style="padding: 14px 28px; font-size: 18px;">Start Your Free Trial</a>
+                </div>
+            </section>
+
+            <section class="section-wrapper reveal" id="features">
+                <div class="section-header">
+                    <h2 class="section-title">Everything You Need to <span class="text-gradient">Succeed</span></h2>
+                    <p class="section-subtitle">A suite of powerful, intuitive tools designed to help you connect with
+                        your audience and grow your business.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📧</div>
+                        <h3 class="feature-title">Smart Campaign Builder</h3>
+                        <p class="feature-description">Create stunning, responsive emails with our intuitive
+                            drag-and-drop editor. No coding required.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-title">Advanced Analytics</h3>
+                        <p class="feature-description">Track opens, clicks, and conversions with detailed analytics that
+                            help you optimize performance.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">Intelligent Automation</h3>
+                        <p class="feature-description">Set up powerful automated sequences that nurture leads and drive
+                            conversions while you sleep.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-wrapper reveal" id="pricing">
+                <div class="section-header">
+                    <h2 class="section-title">Simple, <span class="text-gradient">Transparent</span> Pricing</h2>
+                    <p class="section-subtitle">Choose a plan that scales with your business. No hidden fees, ever.</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3 class="plan-name">Starter</h3>
+                        <div class="plan-price">$0<span>/month</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 1,000 Emails/Month</li>
+                            <li>✓ Basic Templates</li>
+                            <li>✓ Community Support</li>
+                        </ul>
+                        <a href="{{ url_for('register') }}" class="btn"
+                           style="background: var(--surface-bg); border: 1px solid var(--border-color); color: var(--primary-text); width: 100%;">Get
+                            Started</a>
+                    </div>
+                    <div class="pricing-card popular">
+                        <h3 class="plan-name">Pro</h3>
+                        <div class="plan-price">$29<span>/month</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 25,000 Emails/Month</li>
+                            <li>✓ Advanced Analytics & A/B Testing</li>
+                            <li>✓ Priority Support</li>
+                        </ul>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary" style="width: 100%;">Choose Pro</a>
+                    </div>
+                    <div class="pricing-card">
+                        <h3 class="plan-name">Enterprise</h3>
+                        <div class="plan-price">$79<span>/month</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 100,000 Emails/Month</li>
+                            <li>✓ Automation Workflows</li>
+                            <li>✓ Dedicated Manager</li>
+                        </ul>
+                        <a href="{{ url_for('register') }}" class="btn"
+                           style="background: var(--surface-bg); border: 1px solid var(--border-color); color: var(--primary-text); width: 100%;">Contact
+                            Sales</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-wrapper reveal">
+                <div class="cta-card">
+                    <h2 class="section-title" style="font-size: 36px;">Ready to Grow Your Business?</h2>
+                    <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">Join thousands of smart marketers
+                        using Mark to drive results.</p>
+                    <a href="{{ url_for('register') }}" class="btn"
+                       style="background-color: #000; color: #fff; padding: 14px 28px; font-size: 18px; margin-top: 20px;">Start
+                        For Free Today</a>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="footer reveal">
+            <p>&copy; {{ current_year }} Mark. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header scroll effect
+        const header = document.getElementById('mainHeader');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
+{% endblock %}

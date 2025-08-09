@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard – Mark{% endblock %}
+
+{% block content %}
+<style>
+    /* Dashboard: White & Black Theme */
+    :root {
+        --db-bg: #F3F4F6; /* Light Gray */
+        --db-surface: #FFFFFF; /* White */
+        --db-border: #E5E7EB;
+        --db-primary-text: #111827; /* Near Black */
+        --db-secondary-text: #6B7280;
+        --db-accent: #111827; /* Black accent */
+        --radius-lg: 12px;
+    }
+
+    body { background-color: var(--db-bg); color: var(--db-primary-text); }
+    .dashboard-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 250px; background-color: var(--db-surface); border-right: 1px solid var(--db-border); padding: 24px; position: fixed; height: 100%; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-header { text-align: center; margin-bottom: 40px; }
+    .sidebar-logo { width: 60px; height: auto; margin-bottom: 12px; }
+    .sidebar-title { font-size: 24px; font-weight: 800; color: var(--db-primary-text); }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-weight: 500; font-size: 15px; color: var(--db-secondary-text); text-decoration: none; transition: all 0.2s ease; cursor: pointer; }
+    .nav-item:hover { background-color: var(--db-bg); color: var(--db-primary-text); }
+    .nav-item.active { background-color: var(--db-accent); color: white; }
+    .nav-item.active svg { color: white; }
+    .nav-item svg { width: 20px; height: 20px; color: var(--db-secondary-text); }
+
+    /* Main Content */
+    .main-content { margin-left: 250px; flex-grow: 1; padding: 32px; }
+
+    .dashboard-header {
+        background-color: var(--db-surface); border: 1px solid var(--db-border);
+        border-radius: var(--radius-lg); padding: 12px 24px; display: flex;
+        justify-content: space-between; align-items: center; margin-bottom: 32px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .page-title { font-size: 20px; font-weight: 600; color: var(--db-primary-text); }
+    .user-profile { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--db-primary-text); font-weight: 500; font-size: 14px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Stats & Charts */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: var(--db-surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--db-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stat-label { font-size: 14px; color: var(--db-secondary-text); margin-bottom: 8px; }
+    .stat-number { font-size: 32px; font-weight: 700; color: var(--db-primary-text); }
+
+    .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px; }
+    .chart-panel { background: var(--db-surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--db-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; height: 400px; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .panel-title { font-size: 18px; font-weight: 600; margin-bottom: 0; }
+    .date-filter-form { display: flex; align-items: center; gap: 10px; }
+    .date-filter-form input[type="date"] { border: 1px solid var(--db-border); border-radius: 6px; padding: 4px 8px; font-size: 13px; color: var(--db-secondary-text); }
+    .date-filter-form button { background-color: var(--db-accent); color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+    .overview-panel-body { display: flex; flex-direction: column; justify-content: center; height: calc(100% - 40px); }
+    .overview-chart-container { position: relative; height: 140px !important; width: 140px !important; margin: 0 auto; margin-bottom: 24px; }
+    .overview-legend { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 12px; }
+    .legend-icon-wrapper { width: 16px; display: flex; justify-content: center; align-items: center; }
+    .legend-color-box { width: 12px; height: 12px; border-radius: 3px; }
+    .legend-label { color: var(--db-secondary-text); font-size: 14px; }
+    .legend-value { font-size: 16px; font-weight: 600; color: var(--db-primary-text); margin-left: auto; }
+
+    /* Contacts & Campaigns */
+    .content-panel { background: var(--db-surface); border-radius: var(--radius-lg); border: 1px solid var(--db-border); margin-top: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--db-border); display: flex; justify-content: space-between; align-items: center; }
+    .panel-body { padding: 24px; }
+    .contacts-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 14px; font-weight: 500; color: var(--db-secondary-text); margin-bottom: 8px; }
+    .form-input, .form-textarea { width: 100%; padding: 12px; border: 1px solid var(--db-border); border-radius: 8px; font-size: 14px; background-color: var(--db-bg); color: var(--db-primary-text); transition: all 0.2s ease; }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--db-accent); }
+    .btn-db { background: var(--db-accent); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; width: 100%; font-size: 14px; }
+    .btn-db:hover { background-color: #374151; }
+    .contacts-table { width: 100%; border-collapse: collapse; }
+    .contacts-table th, .contacts-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--db-border); }
+    .contacts-table th { font-size: 12px; color: var(--db-secondary-text); text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-danger { background-color: #FEE2E2; color: #B91C1C; font-size: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer; border: none; }
+
+    /* NEW: Campaign Layout Style */
+    .campaign-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two equal columns */
+        gap: 24px;
+    }
+
+    /* Responsive */
+    .mobile-menu-btn { display: none; }
+    @media (max-width: 1200px) { .charts-grid, .contacts-layout, .campaign-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 1024px) {
+        .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1000; }
+        .sidebar.open { transform: translateX(0); }
+        .main-content { margin-left: 0; }
+        .mobile-menu-btn { display: block; background: none; border: none; color: var(--db-primary-text); font-size: 24px; cursor: pointer; }
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Mark Logo" class="sidebar-logo">
+            <h1 class="sidebar-title">MARK</h1>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" onclick="showSection(event, 'dashboard')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="showSection(event, 'contacts')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span>Contacts</span>
+            </div>
+            <div class="nav-item" onclick="showSection(event, 'email')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <span>Email Campaign</span>
+            </div>
+            <div class="nav-item" onclick="showSection(event, 'campaigns')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Campaign History</span>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+             <a href="{{ url_for('smtp_settings') }}" class="nav-item" style="text-decoration: none;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Settings</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="dashboard-header">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2 class="page-title" id="pageTitle">Dashboard</h2>
+            <a href="{{ url_for('profile_settings') }}" class="user-profile">
+                <img src="{{ url_for('user_avatar') }}" alt="User Avatar" class="user-avatar">
+                <span>{{ current_user.first_name }}</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </a>
+        </header>
+
+        <div class="content-area">
+            <section class="section active" id="dashboard">
+                </section>
+
+            <section class="section" id="contacts">
+                <div class="contacts-layout">
+                    <div class="content-panel" style="margin-top:0;">
+                        <div class="panel-header"><h3 class="panel-title">Add New Contact</h3></div>
+                        <div class="panel-body">
+                            <form method="POST">
+                                <input type="hidden" name="add_contact" value="1">
+                                <div class="form-group"><label class="form-label">Company Name *</label><input type="text" name="company_name" class="form-input" required></div>
+                                <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
+                                <div class="form-group"><label class="form-label">Contact Person</label><input type="text" name="contact" class="form-input"></div>
+                                <div class="form-group"><label class="form-label">Phone Number</label><input type="text" name="phone_number" class="form-input"></div>
+                                <div class="form-group"><label class="form-label">Company Type</label><input type="text" name="company_type" class="form-input"></div>
+                                <div class="form-group"><label class="form-label">Location</label><input type="text" name="location" class="form-input"></div>
+                                <button type="submit" class="btn-db">Add Contact</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="content-panel" style="margin-top:0;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Your Contacts ({{ total_contacts or 0 }})</h3>
+                            <a href="{{ url_for('export_contacts') }}" class="btn-db" style="width: auto; font-size: 12px; padding: 8px 16px;">Export All</a>
+                        </div>
+                        <div class="panel-body" style="padding: 0; max-height: 500px; overflow-y: auto;">
+                             <table class="contacts-table">
+                                <thead><tr><th>Company</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+                                <tbody>
+                                {% for contact in contacts %}
+                                    <tr>
+                                        <td><strong>{{ contact.company_name }}</strong><br><small style="color: var(--db-secondary-text);">{{ contact.contact or '-' }}</small></td>
+                                        <td><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></td>
+                                        <td>{{ contact.phone_number or '-' }}</td>
+                                        <td>
+                                            <form method="POST" onsubmit="return confirm('Are you sure?')">
+                                                <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                                                <button type="submit" name="delete_contact" class="btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--db-secondary-text);">No contacts found. Add one to get started!</td></tr>
+                                {% endfor %}
+                                </tbody>
+                             </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="email">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="campaign-layout">
+                        <div class="content-panel" style="margin-top:0;">
+                            <div class="panel-header"><h3 class="panel-title">Create New Email Campaign</h3></div>
+                            <div class="panel-body">
+                                <div class="form-group"><label class="form-label">Subject *</label><input type="text" name="subject" class="form-input" required></div>
+                                <div class="form-group"><label class="form-label">Message *</label><textarea name="message" class="form-textarea" rows="8" required></textarea></div>
+                                <div class="form-group"><label class="form-label">Attachments (Optional)</label><input type="file" name="attachments" class="form-input"></div>
+                                <div class="form-group">
+                                    <label class="form-label">Send To:</label>
+                                    <div style="display: flex; gap: 20px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="radio" id="send_all_option" name="send_to_option" value="all" checked>
+                                            <label for="send_all_option" style="cursor: pointer;">All Contacts</label>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="radio" id="send_selected_option" name="send_to_option" value="selected">
+                                            <label for="send_selected_option" style="cursor: pointer;">Selected Contacts</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-panel" style="margin-top:0;">
+                            <div class="panel-header"><h3 class="panel-title">Select Contacts</h3></div>
+                            <div class="panel-body" style="padding: 0; max-height: 500px; overflow-y: auto;">
+                                <table class="contacts-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select_all_contacts"></th>
+                                            <th>Company</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for contact in contacts %}
+                                        <tr>
+                                            <td><input type="checkbox" class="contact-checkbox" name="selected_contacts" value="{{ contact.id }}"></td>
+                                            <td><strong>{{ contact.company_name }}</strong></td>
+                                            <td>{{ contact.email }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="3" style="text-align: center; padding: 40px; color: var(--db-secondary-text);">No contacts to select.</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-panel">
+                        <div class="panel-body">
+                            <button type="submit" name="send_email" value="1" class="btn-db">Send Campaign</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <section class="section" id="campaigns">
+                 </section>
+        </div>
+    </main>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --- SCRIPT CLEANUP: The complex 'handleCampaignSubmit' function is no longer needed. ---
+        // --- Only the simple helper scripts remain. ---
+
+        function showSection(event, name) {
+            event.preventDefault();
+            const titles = {
+                dashboard: 'Dashboard', contacts: 'Contact Management',
+                email: 'New Email Campaign', campaigns: 'Campaign History'
+            };
+            document.getElementById('pageTitle').textContent = titles[name] || 'Dashboard';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // "Select All" functionality for checkboxes in the campaign section
+            const selectAllCheckbox = document.getElementById('select_all_contacts');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function(event) {
+                    // Find checkboxes only within the campaign layout
+                    const campaignContacts = document.querySelectorAll('#email .contact-checkbox');
+                    campaignContacts.forEach(checkbox => {
+                        checkbox.checked = event.target.checked;
+                    });
+                });
+            }
+
+            // Initialize Charts
+            // ... Chart.js code remains the same ...
+            const emailCtx = document.getElementById('emailSentChart').getContext('2d');
+            let emailSentChart = new Chart(emailCtx, {
+                type: 'line', data: { labels: {{ chart_labels | tojson }}, datasets: [{ label: 'Emails Sent', data: {{ chart_data | tojson }}, borderColor: '#111827', backgroundColor: 'rgba(17, 24, 39, 0.05)', fill: true, tension: 0.4 }] },
+                options: {responsive: true, maintainAspectRatio: false}
+            });
+
+            const campaignCtx = document.getElementById('campaignsChart').getContext('2d');
+            new Chart(campaignCtx, {
+                type: 'doughnut', data: { labels: ['Successful', 'Failed'], datasets: [{ data: [{{ successful_campaigns or 0 }}, {{ failed_campaigns or 0 }}], backgroundColor: ['#22C55E', '#EF4444'], borderColor: 'var(--db-surface)', borderWidth: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: {legend: {display: false}} }
+            });
+        });
+    </script>
+{% endblock %}
