@@ -101,8 +101,8 @@ def send_otp_email(user, otp, subject):
     return send_email(user.email, subject, body)
 
 
-def _finish_login(user):
-    login_user(user)
+def _finish_login(user, remember=False):
+    login_user(user, remember=remember)
     session["user_name"] = user.get_full_name()
     session["user_email"] = user.email
     flash(f"Welcome back, {user.first_name}!", "success")
@@ -164,13 +164,16 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         company = request.form.get('company')
+        mobile_number = request.form.get('mobile_number')
+        company_address = request.form.get('company_address')
+        how_did_you_hear = request.form.get('how_did_you_hear')
 
         # --- CORRECTED validation check (no username) ---
-        if not all([first_name, last_name, email, password]):
+        if not all([first_name, last_name, email, password, company, mobile_number, company_address, how_did_you_hear]):
             print(">>> REASON: Validation failed. A required field is missing.")
             # CORRECTED the flash message
             flash(
-                'Please fill out all required fields: Name, Email, and Password.', 'error')
+                'Please fill out all required fields.', 'error')
             return redirect(url_for('main.register'))
 
         # Check if user email already exists (this part is correct)
@@ -191,6 +194,9 @@ def register():
             'email': email,
             'password': password,
             'company': company,
+            'mobile_number': mobile_number,
+            'company_address': company_address,
+            'how_did_you_hear': how_did_you_hear,
             'otp': otp,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
@@ -254,6 +260,9 @@ def verify_registration_otp():
                 last_name=reg_data['last_name'],
                 email=reg_data['email'],
                 company=reg_data['company'],
+                mobile_number=reg_data['mobile_number'],
+                company_address=reg_data['company_address'],
+                how_did_you_hear=reg_data['how_did_you_hear'],
                 is_verified=True  # Mark user as verified
             )
             new_user.set_password(reg_data['password'])
@@ -401,6 +410,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        remember = request.form.get('remember')  # Get remember me checkbox
         user = User.query.filter_by(email=email).first()
 
         # Check if the user exists and the password is correct
@@ -417,12 +427,13 @@ def login():
                 send_otp_email(user, otp, "Your Login Verification Code")
                 flash("A verification code has been sent to your email.", "info")
 
-                # 3. Store the user's ID to verify on the next screen and redirect
+                # 3. Store the user's ID and remember preference to verify on the next screen and redirect
                 session['pending_uid'] = user.id
+                session['remember_user'] = bool(remember)  # Store remember preference
                 return redirect(url_for('main.login_otp'))
             else:
                 # If 2FA is not enabled, log them in directly
-                return _finish_login(user)
+                return _finish_login(user, remember=bool(remember))
             # --- END OF NEW LOGIC ---
 
         flash("Invalid email or password.", "error")
@@ -441,8 +452,9 @@ def login_otp():
     if request.method == "POST":
         if user.verify_login_otp(request.form.get("otp", "")):
             db.session.commit()
+            remember = session.pop("remember_user", False)  # Get and remove remember preference
             session.pop("pending_uid", None)
-            return _finish_login(user)
+            return _finish_login(user, remember=remember)
         else:
             flash("Invalid or expired code.", "error")
     return render_template("login_otp.html", user=user)
@@ -557,6 +569,12 @@ def profile_settings():
             current_user.last_name = new_last_name
             session['user_name'] = current_user.get_full_name()
 
+        # Update new profile fields
+        current_user.company = request.form.get('company', '').strip()
+        current_user.mobile_number = request.form.get('mobile_number', '').strip()
+        current_user.company_address = request.form.get('company_address', '').strip()
+        current_user.how_did_you_hear = request.form.get('how_did_you_hear', '').strip()
+
         picture = request.files.get('profile_picture')
         if picture and picture.filename != '':
             # FIX: File size limit has been removed.
@@ -651,13 +669,7 @@ def forgot_password():
             )
 
             if success:
-                success, message = send_email(  # This overwrites the previous result!
-                    user.email,
-                    "Password Reset OTP",
-                    f"Your password reset OTP is: {otp}. This code expires in 15 minutes.",
-                    user=user
-                )
-
+                flash("If an account with that email exists, a reset code has been sent.", "info")
             else:
                 # Show a user-friendly error without revealing the OTP
                 flash(
@@ -671,7 +683,7 @@ def forgot_password():
         flash("If an account with that email exists, a reset code has been sent.", "info")
         return redirect(url_for('main.forgot_password'))
 
-    return render_template('main.forgot_password.html')
+    return render_template('forgot_password.html')
 
 
 # In app.py
@@ -814,6 +826,25 @@ def dashboard():
             flash("Contact added successfully!", "success")
             return redirect(url_for("main.dashboard"))
 
+        # --- Handle Edit Contact ---
+        if "edit_contact" in form_data:
+            contact_id = form_data.get("contact_id")
+            contact = Contact.query.filter_by(id=contact_id, user_id=uid).first()
+            
+            if contact:
+                contact.company_name = form_data.get("company_name")
+                contact.contact = form_data.get("contact")
+                contact.email = form_data.get("email")
+                contact.phone_number = form_data.get("phone_number")
+                contact.company_type = form_data.get("company_type")
+                contact.location = form_data.get("location")
+                
+                db.session.commit()
+                flash("Contact updated successfully!", "success")
+            else:
+                flash("Contact not found or access denied.", "error")
+            return redirect(url_for("main.dashboard"))
+
         if "import_contacts" in form_data:
             uploaded_file = request.files.get('file')
 
@@ -886,6 +917,94 @@ def dashboard():
                 flash("Contact deleted.", "success")
             return redirect(url_for("main.dashboard"))
 
+        # --- Handle Delete Selected Campaigns ---
+        if "delete_selected_campaigns" in form_data:
+            campaign_ids = request.form.getlist('campaign_ids')
+            if campaign_ids:
+                campaigns_to_delete = Campaign.query.filter(
+                    Campaign.id.in_(campaign_ids), 
+                    Campaign.user_id == uid
+                ).all()
+                
+                for campaign in campaigns_to_delete:
+                    db.session.delete(campaign)
+                
+                db.session.commit()
+                flash(f"{len(campaigns_to_delete)} campaign(s) deleted successfully.", "success")
+            else:
+                flash("No campaigns selected for deletion.", "error")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle Clear All Campaigns ---
+        if "clear_all_campaigns" in form_data:
+            campaigns_to_clear = Campaign.query.filter_by(user_id=uid).all()
+            campaign_count = len(campaigns_to_clear)
+            
+            for campaign in campaigns_to_clear:
+                db.session.delete(campaign)
+            
+            db.session.commit()
+            flash(f"All {campaign_count} campaign(s) cleared successfully.", "success")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle SMTP Settings ---
+        if "save_smtp" in form_data:
+            send_method = form_data.get("send_method")
+            
+            if send_method == "custom":
+                current_user.use_custom_smtp = True
+                current_user.smtp_email = form_data.get("smtp_email")
+                current_user.smtp_sender_name = form_data.get("smtp_sender_name")
+                current_user.smtp_port = int(form_data.get("smtp_port", 587))
+                
+                # Handle server selection
+                selected_server = form_data.get("smtp_server")
+                if selected_server == "custom":
+                    current_user.smtp_server = form_data.get("custom_smtp_server")
+                else:
+                    current_user.smtp_server = selected_server
+                
+                # Encrypt and store password if provided
+                password = form_data.get("smtp_password")
+                if password:
+                    current_user.smtp_password = encrypt_password(password)
+                
+                current_user.smtp_verified = False
+            else:
+                # Use system SMTP
+                current_user.use_custom_smtp = False
+                current_user.smtp_verified = True
+            
+            db.session.commit()
+            flash("SMTP settings saved successfully!", "success")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle WhatsApp Settings ---
+        if "save_whatsapp" in form_data:
+            integration_type = form_data.get("integration_type", "personal")
+            current_user.whatsapp_integration_type = integration_type
+            
+            if integration_type == "personal":
+                current_user.whatsapp_number = form_data.get("whatsapp_number", "").strip()
+            elif integration_type == "twilio":
+                current_user.whatsapp_sid = form_data.get("twilio_sid", "").strip()
+                current_user.whatsapp_number = form_data.get("twilio_whatsapp_number", "").strip()
+                
+                auth_token = form_data.get("twilio_auth_token", "").strip()
+                if auth_token:
+                    current_user.whatsapp_auth_token = auth_token
+            elif integration_type == "business":
+                current_user.whatsapp_business_phone_id = form_data.get("business_phone_id", "").strip()
+                current_user.whatsapp_business_app_id = form_data.get("business_app_id", "").strip()
+                
+                business_token = form_data.get("business_token", "").strip()
+                if business_token:
+                    current_user.whatsapp_business_token = business_token
+            
+            db.session.commit()
+            flash(f"{integration_type.title()} WhatsApp settings saved successfully!", "success")
+            return redirect(url_for("main.dashboard"))
+
         # --- Handle Send Email Campaign ---
         if "send_email" in form_data:
             send_option = form_data.get('send_to_option')
@@ -909,26 +1028,51 @@ def dashboard():
             subject = form_data.get('subject')
             message = form_data.get('message')
 
+            # Handle file attachments
+            attachment_files = []
+            attachment_names = []
+            uploaded_file = request.files.get('attachments')
+            
+            if uploaded_file and uploaded_file.filename != '':
+                # Read file data
+                file_data = uploaded_file.read()
+                file_name = uploaded_file.filename
+                file_type = uploaded_file.content_type or 'application/octet-stream'
+                
+                # Prepare for email service (expects list of tuples)
+                attachment_files = [(file_data, file_name, file_type)]
+                attachment_names.append(file_name)
+
             # This logic sets the Reply-To address correctly
             reply_address = None
             if current_user.use_custom_smtp and current_user.smtp_email:
                 reply_address = current_user.smtp_email
 
             campaign = Campaign(
-                user_id=uid, subject=subject, message=message, recipient_count=len(
-                    contacts_to_send)
+                user_id=uid, 
+                subject=subject, 
+                message=message, 
+                recipient_count=len(contacts_to_send),
+                attachments=', '.join(attachment_names) if attachment_names else None
             )
             db.session.add(campaign)
 
             sent, failed = 0, 0
             for contact in contacts_to_send:
-                # Note the corrected 'reply_to_addr' argument
-                success, error_msg = send_email(contact.email, subject, message, user=current_user,
-                                                reply_to_addr=reply_address)
+                # Include attachments in email sending
+                success, error_msg = send_email(
+                    contact.email, 
+                    subject, 
+                    message, 
+                    files=attachment_files if attachment_files else None,
+                    user=current_user,
+                    reply_to_addr=reply_address
+                )
                 if success:
                     sent += 1
                 else:
                     failed += 1
+                    print(f"Failed to send email to {contact.email}: {error_msg}")
 
             campaign.success_count = sent
             campaign.failed_count = failed

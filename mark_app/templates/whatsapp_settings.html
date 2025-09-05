@@ -233,13 +233,58 @@
         <!-- WhatsApp Number -->
         <div class="settings-card">
             <div class="card-header">
-                <h2 class="card-title">My WhatsApp Number</h2>
+                <h2 class="card-title">WhatsApp Integration Settings</h2>
             </div>
             <form action="{{ url_for('whatsapp.whatsapp_settings') }}" method="POST" class="card-body">
-                <label class="form-label">WhatsApp Number</label>
-                <input type="text" name="whatsapp_number" class="form-control" value="{{ whatsapp_number }}" required>
-                <div style="margin-top:1rem;">
-                    <button type="submit" class="btn btn-success">Save</button>
+                <label class="form-label">Integration Type</label>
+                <select name="integration_type" class="form-control" id="integrationType" onchange="toggleIntegrationFields()">
+                    <option value="personal" {% if current_user.whatsapp_integration_type == 'personal' %}selected{% endif %}>Personal WhatsApp</option>
+                    <option value="twilio" {% if current_user.whatsapp_integration_type == 'twilio' %}selected{% endif %}>Twilio Integration</option>
+                    <option value="business" {% if current_user.whatsapp_integration_type == 'business' %}selected{% endif %}>WhatsApp Business API</option>
+                </select>
+                
+                <!-- Personal WhatsApp Section -->
+                <div id="personalSection" style="margin-top: 1rem;">
+                    <label class="form-label">WhatsApp Number</label>
+                    <input type="text" name="whatsapp_number" class="form-control" value="{{ current_user.whatsapp_number or '' }}" placeholder="+1234567890">
+                    <small style="color: #6b7280; font-size: 0.8rem;">For personal WhatsApp, messages will open in WhatsApp Web/App</small>
+                </div>
+                
+                <!-- Twilio Section -->
+                <div id="twilioSection" style="margin-top: 1rem; display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">Twilio Account SID</label>
+                        <input type="text" name="twilio_sid" class="form-control" value="{{ current_user.whatsapp_sid or '' }}" placeholder="AC...">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">Twilio Auth Token</label>
+                        <input type="password" name="twilio_auth_token" class="form-control" value="{{ current_user.whatsapp_auth_token or '' }}" placeholder="Your Twilio Auth Token">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">Twilio WhatsApp Number</label>
+                        <input type="text" name="twilio_whatsapp_number" class="form-control" value="{{ current_user.whatsapp_number or '' }}" placeholder="whatsapp:+14155238886">
+                    </div>
+                </div>
+                
+                <!-- WhatsApp Business API Section -->
+                <div id="businessSection" style="margin-top: 1rem; display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">Business Access Token</label>
+                        <input type="password" name="business_token" class="form-control" value="{{ current_user.whatsapp_business_token or '' }}" placeholder="Your WhatsApp Business Access Token">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">Phone Number ID</label>
+                        <input type="text" name="business_phone_id" class="form-control" value="{{ current_user.whatsapp_business_phone_id or '' }}" placeholder="123456789012345">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label">App ID</label>
+                        <input type="text" name="business_app_id" class="form-control" value="{{ current_user.whatsapp_business_app_id or '' }}" placeholder="123456789012345">
+                    </div>
+                </div>
+                
+                <div style="margin-top:1.5rem;">
+                    <button type="submit" class="btn btn-success">Save Settings</button>
+                    <button type="button" onclick="testWhatsAppConnection()" class="btn" style="background: #2563eb; color: white; margin-left: 0.5rem;">Test Connection</button>
                 </div>
             </form>
         </div>
@@ -348,5 +393,39 @@ document.getElementById("searchInput").addEventListener("input", function() {
     matches.forEach(m => contactList.appendChild(m));
     others.forEach(o => contactList.appendChild(o));
 });
+</script>
+
+<script>
+// WhatsApp Integration Type Handling
+function toggleIntegrationFields() {
+    const integrationType = document.getElementById('integrationType').value;
+    const personalSection = document.getElementById('personalSection');
+    const twilioSection = document.getElementById('twilioSection');
+    const businessSection = document.getElementById('businessSection');
+    
+    // Hide all sections
+    personalSection.style.display = 'none';
+    twilioSection.style.display = 'none';
+    businessSection.style.display = 'none';
+    
+    // Show relevant section
+    if (integrationType === 'personal') {
+        personalSection.style.display = 'block';
+    } else if (integrationType === 'twilio') {
+        twilioSection.style.display = 'block';
+    } else if (integrationType === 'business') {
+        businessSection.style.display = 'block';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleIntegrationFields();
+});
+
+function testWhatsAppConnection() {
+    const integrationType = document.getElementById('integrationType').value;
+    alert(`Testing ${integrationType} WhatsApp connection... (This feature will be implemented)`);
+}
 </script>
 {% endblock %}

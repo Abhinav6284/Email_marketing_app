@@ -12,7 +12,7 @@ def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__)
     app.config["SECRET_KEY"] = config.SECRET_KEY
-    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:1234@localhost:3306/markdb"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///markdb.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # 2. Link extensions to the app instance

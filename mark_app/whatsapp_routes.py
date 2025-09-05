@@ -16,20 +16,31 @@ whatsapp_bp = Blueprint(
 @login_required
 def whatsapp_settings():
     if request.method == "POST":
-        whatsapp_number = request.form.get("whatsapp_number", "").strip()
-        current_user.whatsapp_number = whatsapp_number
+        integration_type = request.form.get("integration_type", "personal")
+        current_user.whatsapp_integration_type = integration_type
+        
+        if integration_type == "personal":
+            current_user.whatsapp_number = request.form.get("whatsapp_number", "").strip()
+        elif integration_type == "twilio":
+            current_user.whatsapp_sid = request.form.get("twilio_sid", "").strip()
+            current_user.whatsapp_auth_token = request.form.get("twilio_auth_token", "").strip()
+            current_user.whatsapp_number = request.form.get("twilio_whatsapp_number", "").strip()
+        elif integration_type == "business":
+            current_user.whatsapp_business_token = request.form.get("business_token", "").strip()
+            current_user.whatsapp_business_phone_id = request.form.get("business_phone_id", "").strip()
+            current_user.whatsapp_business_app_id = request.form.get("business_app_id", "").strip()
+        
         db.session.commit()
-        flash("WhatsApp settings saved", "success")
+        flash(f"{integration_type.title()} WhatsApp settings saved successfully", "success")
         return redirect(url_for("whatsapp.whatsapp_settings"))
 
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
     # Include messages for history
     for c in contacts:
-        c.messages = MessageHistory.query.filter_by(contact_id=c.id, user_id=current_user.id).order_by(MessageHistory.date.desc()).all()
+        c.messages = MessageHistory.query.filter_by(contact_id=c.id, user_id=current_user.id).order_by(MessageHistory.timestamp.desc()).all()
 
     return render_template(
         "whatsapp_settings.html",
-        whatsapp_number=getattr(current_user, "whatsapp_number", ""),
         contacts=contacts
     )
 

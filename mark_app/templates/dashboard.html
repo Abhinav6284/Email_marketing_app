@@ -415,16 +415,33 @@ body {
         border: none;
     }
 
+    .btn-edit {
+        background-color: #DBEAFE;
+        color: #1D4ED8;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-edit:hover {
+        background-color: #BFDBFE;
+    }
+
     /* Responsive */
     .mobile-menu-btn {
         display: none;
     }
 
     @media (max-width: 1200px) {
-
         .charts-grid,
         .contacts-layout,
         .campaign-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -451,6 +468,123 @@ body {
             color: var(--db-primary-text);
             font-size: 24px;
             cursor: pointer;
+        }
+        
+        .content-panel {
+            margin: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .panel-header {
+            padding: 1rem;
+        }
+        
+        .contacts-table {
+            font-size: 12px;
+        }
+        
+        .contacts-table th,
+        .contacts-table td {
+            padding: 8px 6px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-wrapper {
+            flex-direction: column;
+        }
+        
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+            transform: none;
+        }
+        
+        .sidebar.open {
+            display: block;
+        }
+        
+        .main-content {
+            margin-left: 0;
+            padding: 0.5rem;
+        }
+        
+        .content-header {
+            padding: 1rem 0.5rem;
+        }
+        
+        .stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .contacts-table {
+            font-size: 11px;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .panel-title {
+            font-size: 1rem;
+        }
+        
+        .btn-db {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .content-panel {
+            margin: 0.25rem;
+        }
+        
+        .form-input,
+        .form-textarea {
+            font-size: 14px;
+            padding: 8px;
+        }
+        
+        .contacts-table th,
+        .contacts-table td {
+            padding: 6px 4px;
+            font-size: 10px;
+        }
+        
+        .btn-edit,
+        .btn-danger {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1rem;
         }
     }
 </style>
@@ -514,7 +648,7 @@ body {
 
         </nav>
         <div class="sidebar-footer">
-            <a href="{{ url_for('main.smtp_settings') }}" class="nav-item" style="text-decoration: none;">
+            <div class="nav-item" onclick="showSection(event, 'settings')">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z">
@@ -523,7 +657,7 @@ body {
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 <span>Settings</span>
-            </a>
+            </div>
         </div>
     </aside>
 
@@ -757,11 +891,14 @@ body {
                                         <td><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></td>
                                         <td>{{ contact.phone_number or '-' }}</td>
                                         <td>
-                                            <form method="POST" onsubmit="return confirm('Are you sure?')">
-                                                <input type="hidden" name="contact_id" value="{{ contact.id }}">
-                                                <button type="submit" name="delete_contact"
-                                                    class="btn-danger">Delete</button>
-                                            </form>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button type="button" onclick="editContact({{ contact.id }}, '{{ contact.company_name|e }}', '{{ contact.contact|e }}', '{{ contact.email|e }}', '{{ contact.phone_number|e }}', '{{ contact.company_type|e }}', '{{ contact.location|e }}')" class="btn-edit">Edit</button>
+                                                <form method="POST" onsubmit="return confirm('Are you sure?')" style="display: inline;">
+                                                    <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                                                    <button type="submit" name="delete_contact"
+                                                        class="btn-danger">Delete</button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% else %}
@@ -962,11 +1099,18 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
                     <div class="panel-header">
                         <h3 class="panel-title">Campaign History</h3>
                         <div style="display: flex; gap: 12px;">
+                            <form method="POST" id="deleteSelectedCampaignsForm" style="display: inline;">
+                                <button type="submit" name="delete_selected_campaigns" value="1" class="btn-danger"
+                                    onclick="return confirmDeleteSelected()"
+                                    style="background: #F59E0B; color: white; padding: 8px 16px; font-size: 12px;">
+                                    Delete Selected
+                                </button>
+                            </form>
                             <form method="POST" style="display: inline;">
-                                <button type="submit" name="clear_history" value="1" class="btn-danger"
+                                <button type="submit" name="clear_all_campaigns" value="1" class="btn-danger"
                                     onclick="return confirm('Are you sure you want to clear all campaign history?')"
                                     style="background: #EF4444; color: white; padding: 8px 16px; font-size: 12px;">
-                                    Clear History
+                                    Clear All
                                 </button>
                             </form>
                         </div>
@@ -977,6 +1121,7 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
                             <table class="contacts-table">
                                 <thead>
                                     <tr>
+                                        <th><input type="checkbox" id="selectAllCampaigns" onchange="toggleAllCampaigns()"></th>
                                         <th>Subject</th>
                                         <th>Sent Date</th>
                                         <th>Recipients</th>
@@ -988,6 +1133,9 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
                                 <tbody>
                                     {% for campaign in campaigns %}
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" name="selected_campaigns" value="{{ campaign.id }}" class="campaign-checkbox">
+                                        </td>
                                         <td>
                                             <strong>{{ campaign.subject }}</strong>
                                             <br>
@@ -1230,6 +1378,144 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
         </div>
     </div>
             </section>
+
+        <!-- Settings Section -->
+        <section class="section" id="settings" style="display: none;">
+            <div class="content-panel" style="margin-top:0;">
+                <div class="panel-header">
+                    <h3 class="panel-title">Integration Settings</h3>
+                </div>
+                
+                <!-- SMTP Settings -->
+                <div class="panel-body">
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--db-primary-text);">Email (SMTP) Settings</h4>
+                        <form method="POST" style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <input type="hidden" name="settings_type" value="smtp">
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Send Method</label>
+                                <select name="send_method" id="send_method" onchange="toggleSmtpFields()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="builtin" {% if not current_user.use_custom_smtp %}selected{% endif %}>Use System SMTP</option>
+                                    <option value="custom" {% if current_user.use_custom_smtp %}selected{% endif %}>Custom SMTP</option>
+                                </select>
+                            </div>
+                            
+                            <div id="customSmtpFields" style="{% if not current_user.use_custom_smtp %}display: none;{% endif %}">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">SMTP Server</label>
+                                        <select name="smtp_server" id="smtp_server" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                            <option value="smtp.gmail.com" {% if current_user.smtp_server == 'smtp.gmail.com' %}selected{% endif %}>Gmail</option>
+                                            <option value="smtp.outlook.com" {% if current_user.smtp_server == 'smtp.outlook.com' %}selected{% endif %}>Outlook</option>
+                                            <option value="smtp.mail.yahoo.com" {% if current_user.smtp_server == 'smtp.mail.yahoo.com' %}selected{% endif %}>Yahoo</option>
+                                            <option value="custom" {% if current_user.smtp_server not in ['smtp.gmail.com', 'smtp.outlook.com', 'smtp.mail.yahoo.com'] %}selected{% endif %}>Other/Custom</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">SMTP Port</label>
+                                        <input type="number" name="smtp_port" value="{{ current_user.smtp_port or 587 }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 15px;" id="customServerField" {% if current_user.smtp_server in ['smtp.gmail.com', 'smtp.outlook.com', 'smtp.mail.yahoo.com'] %}style="display: none;"{% endif %}>
+                                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Custom SMTP Server</label>
+                                    <input type="text" name="custom_smtp_server" value="{{ current_user.smtp_server or '' }}" placeholder="mail.yourcompany.com" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Email</label>
+                                        <input type="email" name="smtp_email" value="{{ current_user.smtp_email or '' }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Sender Name</label>
+                                        <input type="text" name="smtp_sender_name" value="{{ current_user.smtp_sender_name or '' }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Password</label>
+                                    <input type="password" name="smtp_password" placeholder="Enter password to update" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" name="save_smtp" style="padding: 8px 16px; background: var(--db-accent); color: white; border: none; border-radius: 6px; cursor: pointer;">Save SMTP Settings</button>
+                                <button type="button" onclick="testSmtp()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Test SMTP</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- WhatsApp Settings -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--db-primary-text);">WhatsApp Integration</h4>
+                        <form method="POST" style="background: #f0f9ff; padding: 1.5rem; border-radius: 8px; border: 1px solid #bae6fd;">
+                            <input type="hidden" name="settings_type" value="whatsapp">
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Integration Type</label>
+                                <select name="integration_type" id="wa_integration_type" onchange="toggleWhatsAppFields()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="personal" {% if current_user.whatsapp_integration_type == 'personal' %}selected{% endif %}>Personal WhatsApp</option>
+                                    <option value="twilio" {% if current_user.whatsapp_integration_type == 'twilio' %}selected{% endif %}>Twilio Integration</option>
+                                    <option value="business" {% if current_user.whatsapp_integration_type == 'business' %}selected{% endif %}>WhatsApp Business API</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Personal WhatsApp -->
+                            <div id="wa_personalSection">
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">WhatsApp Number</label>
+                                    <input type="text" name="whatsapp_number" value="{{ current_user.whatsapp_number or '' }}" placeholder="+1234567890" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <small style="color: #6b7280; font-size: 0.8rem;">For personal WhatsApp, messages will open in WhatsApp Web/App</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Twilio Section -->
+                            <div id="wa_twilioSection" style="display: none;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Twilio Account SID</label>
+                                        <input type="text" name="twilio_sid" value="{{ current_user.whatsapp_sid or '' }}" placeholder="AC..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Twilio WhatsApp Number</label>
+                                        <input type="text" name="twilio_whatsapp_number" value="{{ current_user.whatsapp_number or '' }}" placeholder="whatsapp:+14155238886" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Twilio Auth Token</label>
+                                    <input type="password" name="twilio_auth_token" placeholder="Enter token to update" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                </div>
+                            </div>
+                            
+                            <!-- WhatsApp Business API Section -->
+                            <div id="wa_businessSection" style="display: none;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Phone Number ID</label>
+                                        <input type="text" name="business_phone_id" value="{{ current_user.whatsapp_business_phone_id or '' }}" placeholder="123456789012345" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">App ID</label>
+                                        <input type="text" name="business_app_id" value="{{ current_user.whatsapp_business_app_id or '' }}" placeholder="123456789012345" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Business Access Token</label>
+                                    <input type="password" name="business_token" placeholder="Enter token to update" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" name="save_whatsapp" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer;">Save WhatsApp Settings</button>
+                                <button type="button" onclick="testWhatsApp()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Test Connection</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
         </div>
     </main>
 </div>
@@ -1243,7 +1529,9 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
             contacts: 'Contact Management',
             email: 'New Email Campaign',
             campaigns: 'Campaign History',
-            replies: 'Received Replies / Leads'
+            replies: 'Received Replies / Leads',
+            whatsapp: 'WhatsApp Connect',
+            settings: 'Integration Settings'
         };
         document.getElementById('pageTitle').textContent = titles[name] || 'Dashboard';
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1383,6 +1671,157 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
             });
         }
     });
+</script>
+
+<!-- Edit Contact Modal -->
+<div id="editContactModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+    <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 12px; width: 500px; max-width: 90%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: var(--db-primary-text);">Edit Contact</h3>
+            <span onclick="closeEditModal()" style="cursor: pointer; font-size: 24px; color: #aaa;">&times;</span>
+        </div>
+        
+        <form method="POST" id="editContactForm">
+            <input type="hidden" name="edit_contact" value="1">
+            <input type="hidden" name="contact_id" id="editContactId">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Company Name *</label>
+                    <input type="text" name="company_name" id="editCompanyName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Contact Person</label>
+                    <input type="text" name="contact" id="editContact" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Email *</label>
+                <input type="email" name="email" id="editEmail" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Phone Number</label>
+                    <input type="tel" name="phone_number" id="editPhone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Company Type</label>
+                    <input type="text" name="company_type" id="editCompanyType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--db-secondary-text); font-size: 12px;">Location</label>
+                <input type="text" name="location" id="editLocation" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeEditModal()" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 20px; background: var(--db-accent); color: white; border: none; border-radius: 6px; cursor: pointer;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editContact(id, company, contact, email, phone, companyType, location) {
+    document.getElementById('editContactId').value = id;
+    document.getElementById('editCompanyName').value = company || '';
+    document.getElementById('editContact').value = contact || '';
+    document.getElementById('editEmail').value = email || '';
+    document.getElementById('editPhone').value = phone || '';
+    document.getElementById('editCompanyType').value = companyType || '';
+    document.getElementById('editLocation').value = location || '';
+    document.getElementById('editContactModal').style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('editContactModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('editContactModal');
+    if (event.target === modal) {
+        closeEditModal();
+    }
+});
+
+// Campaign selection functions
+function toggleAllCampaigns() {
+    const selectAll = document.getElementById('selectAllCampaigns');
+    const checkboxes = document.querySelectorAll('.campaign-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function confirmDeleteSelected() {
+    const selectedCampaigns = document.querySelectorAll('.campaign-checkbox:checked');
+    if (selectedCampaigns.length === 0) {
+        alert('Please select at least one campaign to delete.');
+        return false;
+    }
+    
+    // Add selected campaign IDs to the form
+    const form = document.getElementById('deleteSelectedCampaignsForm');
+    // Remove any existing hidden inputs
+    form.querySelectorAll('input[name="campaign_ids"]').forEach(input => input.remove());
+    
+    selectedCampaigns.forEach(checkbox => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'campaign_ids';
+        hiddenInput.value = checkbox.value;
+        form.appendChild(hiddenInput);
+    });
+    
+    return confirm(`Are you sure you want to delete ${selectedCampaigns.length} selected campaign(s)?`);
+}
+
+// Settings form handlers
+function toggleSmtpFields() {
+    const sendMethod = document.getElementById('send_method').value;
+    const customFields = document.getElementById('customSmtpFields');
+    customFields.style.display = sendMethod === 'custom' ? 'block' : 'none';
+}
+
+function toggleWhatsAppFields() {
+    const integrationType = document.getElementById('wa_integration_type').value;
+    const personalSection = document.getElementById('wa_personalSection');
+    const twilioSection = document.getElementById('wa_twilioSection');
+    const businessSection = document.getElementById('wa_businessSection');
+    
+    // Hide all sections
+    personalSection.style.display = 'none';
+    twilioSection.style.display = 'none';
+    businessSection.style.display = 'none';
+    
+    // Show relevant section
+    if (integrationType === 'personal') {
+        personalSection.style.display = 'block';
+    } else if (integrationType === 'twilio') {
+        twilioSection.style.display = 'block';
+    } else if (integrationType === 'business') {
+        businessSection.style.display = 'block';
+    }
+}
+
+function testSmtp() {
+    alert('SMTP test functionality will be implemented.');
+}
+
+function testWhatsApp() {
+    alert('WhatsApp test functionality will be implemented.');
+}
+
+// Initialize settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleSmtpFields();
+    toggleWhatsAppFields();
+});
 </script>
 
 
