@@ -826,6 +826,25 @@ def dashboard():
             flash("Contact added successfully!", "success")
             return redirect(url_for("main.dashboard"))
 
+        # --- Handle Edit Contact ---
+        if "edit_contact" in form_data:
+            contact_id = form_data.get("contact_id")
+            contact = Contact.query.filter_by(id=contact_id, user_id=uid).first()
+            
+            if contact:
+                contact.company_name = form_data.get("company_name")
+                contact.contact = form_data.get("contact")
+                contact.email = form_data.get("email")
+                contact.phone_number = form_data.get("phone_number")
+                contact.company_type = form_data.get("company_type")
+                contact.location = form_data.get("location")
+                
+                db.session.commit()
+                flash("Contact updated successfully!", "success")
+            else:
+                flash("Contact not found or access denied.", "error")
+            return redirect(url_for("main.dashboard"))
+
         if "import_contacts" in form_data:
             uploaded_file = request.files.get('file')
 
@@ -896,6 +915,36 @@ def dashboard():
                 db.session.delete(contact_to_delete)
                 db.session.commit()
                 flash("Contact deleted.", "success")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle Delete Selected Campaigns ---
+        if "delete_selected_campaigns" in form_data:
+            campaign_ids = request.form.getlist('campaign_ids')
+            if campaign_ids:
+                campaigns_to_delete = Campaign.query.filter(
+                    Campaign.id.in_(campaign_ids), 
+                    Campaign.user_id == uid
+                ).all()
+                
+                for campaign in campaigns_to_delete:
+                    db.session.delete(campaign)
+                
+                db.session.commit()
+                flash(f"{len(campaigns_to_delete)} campaign(s) deleted successfully.", "success")
+            else:
+                flash("No campaigns selected for deletion.", "error")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle Clear All Campaigns ---
+        if "clear_all_campaigns" in form_data:
+            campaigns_to_clear = Campaign.query.filter_by(user_id=uid).all()
+            campaign_count = len(campaigns_to_clear)
+            
+            for campaign in campaigns_to_clear:
+                db.session.delete(campaign)
+            
+            db.session.commit()
+            flash(f"All {campaign_count} campaign(s) cleared successfully.", "success")
             return redirect(url_for("main.dashboard"))
 
         # --- Handle Send Email Campaign ---
