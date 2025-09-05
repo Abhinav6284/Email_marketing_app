@@ -101,8 +101,8 @@ def send_otp_email(user, otp, subject):
     return send_email(user.email, subject, body)
 
 
-def _finish_login(user):
-    login_user(user)
+def _finish_login(user, remember=False):
+    login_user(user, remember=remember)
     session["user_name"] = user.get_full_name()
     session["user_email"] = user.email
     flash(f"Welcome back, {user.first_name}!", "success")
@@ -410,6 +410,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        remember = request.form.get('remember')  # Get remember me checkbox
         user = User.query.filter_by(email=email).first()
 
         # Check if the user exists and the password is correct
@@ -426,12 +427,13 @@ def login():
                 send_otp_email(user, otp, "Your Login Verification Code")
                 flash("A verification code has been sent to your email.", "info")
 
-                # 3. Store the user's ID to verify on the next screen and redirect
+                # 3. Store the user's ID and remember preference to verify on the next screen and redirect
                 session['pending_uid'] = user.id
+                session['remember_user'] = bool(remember)  # Store remember preference
                 return redirect(url_for('main.login_otp'))
             else:
                 # If 2FA is not enabled, log them in directly
-                return _finish_login(user)
+                return _finish_login(user, remember=bool(remember))
             # --- END OF NEW LOGIC ---
 
         flash("Invalid email or password.", "error")
@@ -450,8 +452,9 @@ def login_otp():
     if request.method == "POST":
         if user.verify_login_otp(request.form.get("otp", "")):
             db.session.commit()
+            remember = session.pop("remember_user", False)  # Get and remove remember preference
             session.pop("pending_uid", None)
-            return _finish_login(user)
+            return _finish_login(user, remember=remember)
         else:
             flash("Invalid or expired code.", "error")
     return render_template("login_otp.html", user=user)
@@ -666,13 +669,7 @@ def forgot_password():
             )
 
             if success:
-                success, message = send_email(  # This overwrites the previous result!
-                    user.email,
-                    "Password Reset OTP",
-                    f"Your password reset OTP is: {otp}. This code expires in 15 minutes.",
-                    user=user
-                )
-
+                flash("If an account with that email exists, a reset code has been sent.", "info")
             else:
                 # Show a user-friendly error without revealing the OTP
                 flash(
@@ -686,7 +683,7 @@ def forgot_password():
         flash("If an account with that email exists, a reset code has been sent.", "info")
         return redirect(url_for('main.forgot_password'))
 
-    return render_template('main.forgot_password.html')
+    return render_template('forgot_password.html')
 
 
 # In app.py
