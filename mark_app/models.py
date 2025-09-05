@@ -34,6 +34,12 @@ class User(UserMixin, db.Model):
     whatsapp_number = db.Column(db.String(50), nullable=True)
     whatsapp_verified = db.Column(db.Boolean, default=False)
     
+    # WhatsApp Integration Types
+    whatsapp_integration_type = db.Column(db.String(50), default='personal')  # personal, twilio, business
+    whatsapp_business_token = db.Column(db.String(500), nullable=True)
+    whatsapp_business_phone_id = db.Column(db.String(100), nullable=True)
+    whatsapp_business_app_id = db.Column(db.String(100), nullable=True)
+    
     # Additional signup fields as requested
     mobile_number = db.Column(db.String(20), nullable=True)
     company_address = db.Column(db.Text, nullable=True)

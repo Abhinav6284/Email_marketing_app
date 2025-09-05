@@ -947,6 +947,64 @@ def dashboard():
             flash(f"All {campaign_count} campaign(s) cleared successfully.", "success")
             return redirect(url_for("main.dashboard"))
 
+        # --- Handle SMTP Settings ---
+        if "save_smtp" in form_data:
+            send_method = form_data.get("send_method")
+            
+            if send_method == "custom":
+                current_user.use_custom_smtp = True
+                current_user.smtp_email = form_data.get("smtp_email")
+                current_user.smtp_sender_name = form_data.get("smtp_sender_name")
+                current_user.smtp_port = int(form_data.get("smtp_port", 587))
+                
+                # Handle server selection
+                selected_server = form_data.get("smtp_server")
+                if selected_server == "custom":
+                    current_user.smtp_server = form_data.get("custom_smtp_server")
+                else:
+                    current_user.smtp_server = selected_server
+                
+                # Encrypt and store password if provided
+                password = form_data.get("smtp_password")
+                if password:
+                    current_user.smtp_password = encrypt_password(password)
+                
+                current_user.smtp_verified = False
+            else:
+                # Use system SMTP
+                current_user.use_custom_smtp = False
+                current_user.smtp_verified = True
+            
+            db.session.commit()
+            flash("SMTP settings saved successfully!", "success")
+            return redirect(url_for("main.dashboard"))
+
+        # --- Handle WhatsApp Settings ---
+        if "save_whatsapp" in form_data:
+            integration_type = form_data.get("integration_type", "personal")
+            current_user.whatsapp_integration_type = integration_type
+            
+            if integration_type == "personal":
+                current_user.whatsapp_number = form_data.get("whatsapp_number", "").strip()
+            elif integration_type == "twilio":
+                current_user.whatsapp_sid = form_data.get("twilio_sid", "").strip()
+                current_user.whatsapp_number = form_data.get("twilio_whatsapp_number", "").strip()
+                
+                auth_token = form_data.get("twilio_auth_token", "").strip()
+                if auth_token:
+                    current_user.whatsapp_auth_token = auth_token
+            elif integration_type == "business":
+                current_user.whatsapp_business_phone_id = form_data.get("business_phone_id", "").strip()
+                current_user.whatsapp_business_app_id = form_data.get("business_app_id", "").strip()
+                
+                business_token = form_data.get("business_token", "").strip()
+                if business_token:
+                    current_user.whatsapp_business_token = business_token
+            
+            db.session.commit()
+            flash(f"{integration_type.title()} WhatsApp settings saved successfully!", "success")
+            return redirect(url_for("main.dashboard"))
+
         # --- Handle Send Email Campaign ---
         if "send_email" in form_data:
             send_option = form_data.get('send_to_option')
