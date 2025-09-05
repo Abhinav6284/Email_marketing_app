@@ -278,6 +278,38 @@
                     <input type="email" id="email" name="email" class="form-input" value="{{ current_user.email }}"
                         disabled>
                 </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="company" class="form-label">Company Name</label>
+                        <input type="text" id="company" name="company" class="form-input"
+                            value="{{ current_user.company or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile_number" class="form-label">Mobile Number</label>
+                        <input type="tel" id="mobile_number" name="mobile_number" class="form-input"
+                            value="{{ current_user.mobile_number or '' }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_address" class="form-label">Company Address</label>
+                    <textarea id="company_address" name="company_address" class="form-input" rows="3">{{ current_user.company_address or '' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="how_did_you_hear" class="form-label">How did you hear about us?</label>
+                    <select id="how_did_you_hear" name="how_did_you_hear" class="form-input">
+                        <option value="">Select an option</option>
+                        <option value="google_search" {% if current_user.how_did_you_hear == 'google_search' %}selected{% endif %}>Google Search</option>
+                        <option value="social_media" {% if current_user.how_did_you_hear == 'social_media' %}selected{% endif %}>Social Media</option>
+                        <option value="friend_referral" {% if current_user.how_did_you_hear == 'friend_referral' %}selected{% endif %}>Friend/Colleague Referral</option>
+                        <option value="online_ad" {% if current_user.how_did_you_hear == 'online_ad' %}selected{% endif %}>Online Advertisement</option>
+                        <option value="email_marketing" {% if current_user.how_did_you_hear == 'email_marketing' %}selected{% endif %}>Email Marketing</option>
+                        <option value="trade_show" {% if current_user.how_did_you_hear == 'trade_show' %}selected{% endif %}>Trade Show/Event</option>
+                        <option value="other" {% if current_user.how_did_you_hear == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
             </div>
             <div class="settings-footer">
                 <a href="{{ url_for('main.logout') }}" class="btn-logout">Logout</a>

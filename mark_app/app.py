@@ -164,13 +164,16 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         company = request.form.get('company')
+        mobile_number = request.form.get('mobile_number')
+        company_address = request.form.get('company_address')
+        how_did_you_hear = request.form.get('how_did_you_hear')
 
         # --- CORRECTED validation check (no username) ---
-        if not all([first_name, last_name, email, password]):
+        if not all([first_name, last_name, email, password, company, mobile_number, company_address, how_did_you_hear]):
             print(">>> REASON: Validation failed. A required field is missing.")
             # CORRECTED the flash message
             flash(
-                'Please fill out all required fields: Name, Email, and Password.', 'error')
+                'Please fill out all required fields.', 'error')
             return redirect(url_for('main.register'))
 
         # Check if user email already exists (this part is correct)
@@ -191,6 +194,9 @@ def register():
             'email': email,
             'password': password,
             'company': company,
+            'mobile_number': mobile_number,
+            'company_address': company_address,
+            'how_did_you_hear': how_did_you_hear,
             'otp': otp,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
@@ -254,6 +260,9 @@ def verify_registration_otp():
                 last_name=reg_data['last_name'],
                 email=reg_data['email'],
                 company=reg_data['company'],
+                mobile_number=reg_data['mobile_number'],
+                company_address=reg_data['company_address'],
+                how_did_you_hear=reg_data['how_did_you_hear'],
                 is_verified=True  # Mark user as verified
             )
             new_user.set_password(reg_data['password'])
@@ -556,6 +565,12 @@ def profile_settings():
             current_user.first_name = new_first_name
             current_user.last_name = new_last_name
             session['user_name'] = current_user.get_full_name()
+
+        # Update new profile fields
+        current_user.company = request.form.get('company', '').strip()
+        current_user.mobile_number = request.form.get('mobile_number', '').strip()
+        current_user.company_address = request.form.get('company_address', '').strip()
+        current_user.how_did_you_hear = request.form.get('how_did_you_hear', '').strip()
 
         picture = request.files.get('profile_picture')
         if picture and picture.filename != '':

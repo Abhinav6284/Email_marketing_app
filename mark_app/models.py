@@ -33,6 +33,11 @@ class User(UserMixin, db.Model):
     whatsapp_auth_token = db.Column(db.String(500), nullable=True)
     whatsapp_number = db.Column(db.String(50), nullable=True)
     whatsapp_verified = db.Column(db.Boolean, default=False)
+    
+    # Additional signup fields as requested
+    mobile_number = db.Column(db.String(20), nullable=True)
+    company_address = db.Column(db.Text, nullable=True)
+    how_did_you_hear = db.Column(db.String(100), nullable=True)
 
     def set_password(self, pw):
         self.password_hash = generate_password_hash(pw)
