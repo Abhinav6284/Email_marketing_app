@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% block title %}Email Settings - Mark{% endblock %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --db-bg: #F3F4F6;
+    --db-surface: #FFFFFF;
+    --db-border: #E5E7EB;
+    --db-primary-text: #111827;
+    --db-secondary-text: #6B7280;
+    --db-accent: #111827;
+    --radius-lg: 12px;
+}
+
+body {
+    background-color: var(--db-bg);
+    color: var(--db-primary-text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Container */
+.settings-container {
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Card Layout */
+.settings-card {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* Sidebar */
+.settings-sidebar {
+    background-color: #FAFAFA;
+    border-right: 1px solid var(--db-border);
+    padding: 24px;
+}
+.settings-sidebar h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+.settings-sidebar p {
+    font-size: 13px;
+    color: var(--db-secondary-text);
+    margin: 0 0 20px 0;
+}
+.back-link {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--db-secondary-text);
+    transition: color 0.2s ease;
+}
+.back-link:hover { color: var(--db-accent); }
+
+/* Main Form Section */
+.settings-main {
+    padding: 28px;
+}
+.settings-main h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* Alerts */
+.alert-error,
+.alert-success {
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.alert-error {
+    border: 1px solid #FECACA;
+    color: #991B1B;
+    background-color: #FEE2E2;
+}
+.alert-success {
+    border: 1px solid #BBF7D0;
+    color: #166534;
+    background-color: #DCFCE7;
+}
+
+/* Radio Options */
+.radio-group {
+    display: flex;
+    gap: 16px;
+}
+.radio-option {
+    flex: 1;
+    border: 2px solid var(--db-border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    background: #fff;
+}
+.radio-option:hover { border-color: #D1D5DB; }
+.radio-option:has(input:checked) {
+    border-color: var(--db-accent);
+    box-shadow: 0 0 0 2px var(--db-accent);
+}
+.radio-label strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.radio-label small {
+    font-size: 12px;
+    color: var(--db-secondary-text);
+}
+.radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+}
+
+/* SMTP Config */
+.custom-fields-panel {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid var(--db-border);
+    border-radius: 10px;
+    background: #FAFAFA;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.form-group { margin-bottom: 18px; }
+.form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--db-secondary-text);
+    margin-bottom: 6px;
+    display: block;
+}
+.form-input, .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--db-accent);
+}
+.form-group small {
+    font-size: 11px;
+    color: var(--db-secondary-text);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Actions */
+.form-actions {
+    margin-top: 28px;
+}
+
+    .btn-back {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-decoration: none;
+        background: #fff;
+        color: #111827;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-back:hover {
+        background: #f9fafb;
+    }
+.btn-db, .btn-secondary {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-db {
+    background: var(--db-accent);
+    color: #fff;
+}
+.btn-db:hover { background: #374151; }
+.btn-secondary {
+    background: #6B7280;
+    color: #fff;
+}
+.btn-secondary:hover { background: #4B5563; }
+.btn-secondary:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+/* Test Section */
+.test-section {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--db-border);
+}
+.test-section p {
+    font-size: 13px;
+    color: var(--db-secondary-text);
+    margin-bottom: 12px;
+}
+.test-result {
+    font-size: 13px;
+    margin-left: 10px;
+}
+</style>
+
+<div class="settings-container">
+  <div class="settings-card">
+    <!-- Sidebar -->
+    <div class="settings-sidebar">
+      <h2>Email Settings</h2>
+      <p>Manage and customize how your email campaigns are sent.</p>
+      <a href="{{ url_for('main.dashboard') }}" class="btn-back">← Back to Dashboard</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="settings-main">
+      <form method="POST">
+        <input type="hidden" name="action" value="save_smtp">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Method -->
+        <div class="method-selection">
+          <h3>Select Sending Method</h3>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="send_method" value="builtin"
+                {{ 'checked' if not current_user.use_custom_smtp }}
+                onchange="toggleCustomFields(false)">
+              <span class="radio-label">
+                <strong>System Email</strong>
+                <small>Fast and ready-to-use option</small>
+              </span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="send_method" value="custom"
+                {{ 'checked' if current_user.use_custom_smtp }}
+                onchange="toggleCustomFields(true)">
+              <span class="radio-label">
+                <strong>Custom SMTP</strong>
+                <small>Use your own email provider</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- SMTP Config -->
+        <div id="customFields" class="custom-fields-panel"
+          style="{{ 'display:block;' if current_user.use_custom_smtp else 'display:none;' }}">
+          <h3>SMTP Configuration</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" name="smtp_email" class="form-input"
+                value="{{ current_user.smtp_email or '' }}"
+                placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" name="smtp_password" class="form-input"
+                placeholder="Enter App Password" required>
+              <small>For Gmail/Yahoo, use an App Password instead of your main password.</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Provider</label>
+              <select id="smtpServer" name="smtp_server" class="form-select"
+                onchange="handleServerChange()" required>
+                <option value="">Select your provider...</option>
+                <option value="smtp.gmail.com" {{ 'selected' if current_user.smtp_server == 'smtp.gmail.com' }}>Gmail</option>
+                <option value="smtp.outlook.com" {{ 'selected' if current_user.smtp_server == 'smtp.outlook.com' }}>Outlook</option>
+                <option value="smtp.yahoo.com" {{ 'selected' if current_user.smtp_server == 'smtp.yahoo.com' }}>Yahoo</option>
+                <option value="custom" {{ 'selected' if current_user.smtp_server and current_user.smtp_server not in ['smtp.gmail.com','smtp.outlook.com','smtp.yahoo.com'] }}>Custom Provider</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Port</label>
+              <input type="number" id="smtpPort" name="smtp_port" class="form-input"
+                value="{{ current_user.smtp_port or 465 }}" required>
+              <small>Common ports: <strong>465</strong> (SSL) or <strong>587</strong> (TLS)</small>
+            </div>
+          </div>
+
+          <div id="customServerField" class="form-group" style="display:none;">
+            <label class="form-label">Custom SMTP Server</label>
+            <input type="text" id="customServer" name="custom_smtp_server" class="form-input"
+              value="{{ current_user.smtp_server if current_user.smtp_server and current_user.smtp_server not in ['smtp.gmail.com','smtp.outlook.com','smtp.yahoo.com'] else '' }}"
+              placeholder="smtp.yourdomain.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sender Name</label>
+            <input type="text" name="smtp_sender_name" class="form-input"
+              value="{{ current_user.smtp_sender_name or '' }}"
+              placeholder="Your Name or Business" required>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-db">Save Settings</button>
+        </div>
+      </form>
+
+      <!-- Test Section -->
+      <div class="test-section">
+        <h3>🧪 Test Your Configuration</h3>
+        <p>Send a test email to confirm your SMTP details are working correctly.</p>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <button type="button" id="test-smtp" class="btn-secondary">🚀 Send Test Email</button>
+          <span id="test-result" class="test-result"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.getElementById('test-smtp').addEventListener('click', function () {
+    const button = this;
+    const result = document.getElementById('test-result');
+    button.disabled = true;
+    button.textContent = 'Testing...';
+    result.textContent = '';
+
+    fetch('/test-smtp', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(r => r.json())
+      .then(data => {
+          if (data.success) {
+              result.innerHTML = '<span class="text-success">✅ ' + data.message + '</span>';
+          } else {
+              result.innerHTML = '<span class="text-danger">❌ ' + data.message + '</span>';
+          }
+      })
+      .catch(error => {
+          result.innerHTML = '<span class="text-danger">❌ Error: ' + error + '</span>';
+      })
+      .finally(() => {
+          button.disabled = false;
+          button.textContent = '🚀 Send Test Email';
+      });
+});
+
+function toggleCustomFields(show) {
+    document.getElementById('customFields').style.display = show ? 'block' : 'none';
+}
+function handleServerChange() {
+    const serverSelect = document.getElementById('smtpServer');
+    const customField = document.getElementById('customServerField');
+    const customInput = document.getElementById('customServer');
+    const portInput = document.getElementById('smtpPort');
+
+    if (serverSelect.value === 'custom') {
+        customField.style.display = 'block';
+        customInput.setAttribute('required', 'required');
+    } else {
+        customField.style.display = 'none';
+        customInput.removeAttribute('required');
+        switch (serverSelect.value) {
+            case 'smtp.gmail.com':
+            case 'smtp.yahoo.com':
+                portInput.value = 465; break;
+            case 'smtp.outlook.com':
+                portInput.value = 587; break;
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    handleServerChange();
+    toggleCustomFields(document.querySelector('input[name="send_method"][value="custom"]').checked);
+});
+</script>
+{% endblock %}

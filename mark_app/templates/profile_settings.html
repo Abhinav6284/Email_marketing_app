@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% block title %}Profile Settings – Mark{% endblock %}
+
+{% block content %}
+<style>
+    /* Using dashboard theme variables for consistency */
+    :root {
+        --db-bg: #F3F4F6;
+        /* Light Gray */
+        --db-surface: #FFFFFF;
+        /* White */
+        --db-border: #E5E7EB;
+        --db-primary-text: #111827;
+        /* Near Black */
+        --db-secondary-text: #6B7280;
+        --db-accent: #111827;
+        /* Black accent */
+        --radius-lg: 12px;
+        --radius-xl: 24px;
+        /* For the bubble shape */
+    }
+
+    body {
+        background-color: var(--db-bg);
+        color: var(--db-primary-text);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .settings-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 24px;
+    }
+
+    .back-link {
+        text-decoration: none;
+        color: var(--db-secondary-text);
+        margin-bottom: 16px;
+        display: inline-block;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        color: var(--db-primary-text);
+    }
+
+    /* --- NEW BUBBLE HEADER --- */
+    .profile-header {
+        background: var(--db-surface);
+        border: 1px solid var(--db-border);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-avatar {
+        width: 100px;
+        /* Bigger profile picture */
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px var(--db-accent);
+    }
+
+    .header-info h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--db-primary-text);
+        margin: 0;
+    }
+
+    .header-info p {
+        font-size: 16px;
+        color: var(--db-secondary-text);
+        margin: 4px 0 0 0;
+    }
+
+    /* --- Settings Card --- */
+    .settings-card {
+        background: var(--db-surface);
+        border: 1px solid var(--db-border);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .settings-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--db-border);
+    }
+
+    .settings-title {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .settings-body {
+        padding: 24px;
+    }
+
+    .profile-pic-section {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .profile-pic-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: var(--db-border);
+        background-size: cover;
+        background-position: center;
+        border: 2px solid var(--db-surface);
+        box-shadow: 0 0 0 2px var(--db-border);
+    }
+
+    .btn-upload {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 16px;
+        background-color: var(--db-surface);
+        color: var(--db-primary-text);
+        border: 1px solid var(--db-border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-upload:hover {
+        background-color: var(--db-bg);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--db-secondary-text);
+        margin-bottom: 8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--db-border);
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--db-accent);
+        box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+    }
+
+    .form-input:disabled {
+        background-color: var(--db-bg);
+        cursor: not-allowed;
+    }
+
+    .settings-footer {
+        padding: 20px 24px;
+        border-top: 1px solid var(--db-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #F9FAFB;
+        border-bottom-left-radius: var(--radius-lg);
+        border-bottom-right-radius: var(--radius-lg);
+    }
+
+    .btn-save {
+        background-color: var(--db-accent);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .btn-logout {
+        background: #FEE2E2;
+        color: #B91C1C;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-back {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-decoration: none;
+        background: #fff;
+        color: #111827;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-back:hover {
+        background: #f9fafb;
+    }
+</style>
+
+<div class="settings-container">
+    <a href="{{ url_for('main.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
+
+    <div class="profile-header">
+        <img src="{{ url_for('main.user_avatar') }}" alt="User Avatar" class="header-avatar">
+        <div class="header-info">
+            <h2>{{ current_user.get_full_name() }}</h2>
+            <p>{{ current_user.email }}</p>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <div class="settings-header">
+            <h2 class="settings-title">Edit Profile</h2>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="settings-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert-{{ category }}"
+                    style="padding: 10px; margin-bottom: 20px; border-radius: 8px; border: 1px solid; color: #B91C1C; background-color: #FEE2E2; border-color: #FECACA;">
+                    {{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <div class="profile-pic-section">
+                    <div class="profile-pic-preview" id="picPreview"
+                        style="background-image: url('{{ url_for('main.user_avatar') }}');"></div>
+                    <div>
+                        <input type="file" name="profile_picture" id="fileUpload" hidden onchange="previewImage(event)"
+                            accept="image/*">
+                        <button type="button" class="btn-upload"
+                            onclick="document.getElementById('fileUpload').click();">Change Picture</button>
+                        <p style="font-size: 12px; color: #9CA3AF; margin-top: 8px;">JPG or PNG. No size limit.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-input"
+                            value="{{ current_user.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-input"
+                            value="{{ current_user.last_name }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" value="{{ current_user.email }}"
+                        disabled>
+                </div>
+            </div>
+            <div class="settings-footer">
+                <a href="{{ url_for('main.logout') }}" class="btn-logout">Logout</a>
+                <button type="submit" class="btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Script to preview the profile picture before uploading
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function () {
+            const preview = document.getElementById('picPreview');
+            // We also update the main header avatar for instant feedback
+            const headerAvatar = document.querySelector('.header-avatar');
+            preview.style.backgroundImage = `url(${reader.result})`;
+            if (headerAvatar) {
+                headerAvatar.src = reader.result;
+            }
+        }
+        if (event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+</script>
+{% endblock %}

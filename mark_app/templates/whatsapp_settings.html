@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% block title %}WhatsApp Settings – Mark{% endblock %}
+
+{% block content %}
+<style>
+    /* Import Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    /* Global font & layout */
+    .whatsapp-settings {
+        background: #ffffff;
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px; /* default small professional size */
+        line-height: 1.6;
+        color: #111827;
+    }
+
+    .settings-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Header */
+    .settings-header {
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid #e5e5e5;
+        padding-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .settings-title {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .settings-subtitle {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.4rem;
+    }
+
+    .btn-back {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-decoration: none;
+        background: #fff;
+        color: #111827;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-back:hover {
+        background: #f9fafb;
+    }
+
+    /* Card */
+    .settings-card {
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .card-header {
+        background: #fafafa;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 1rem 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form */
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background: #fff;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    textarea.form-control {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .btn {
+        padding: 0.55rem 1.2rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-success {
+        background: #22c55e;
+        color: #fff;
+    }
+
+    .btn-success:hover {
+        background: #16a34a;
+    }
+
+    /* Contact list */
+    .contact-item {
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .contact-header {
+        padding: 0.9rem 1rem;
+        background: #f9fafb;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        font-size: 0.9rem;
+        transition: background 0.2s ease;
+    }
+
+    .contact-header:hover {
+        background: #f3f4f6;
+    }
+
+    .contact-details {
+        display: none;
+        padding: 1rem;
+        border-top: 1px solid #eee;
+        font-size: 0.85rem;
+    }
+
+    /* History */
+    .btn-toggle {
+        background: none;
+        color: #2563eb;
+        border: none;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+
+    .btn-toggle:hover {
+        text-decoration: underline;
+    }
+
+    .history-content {
+        background: #fafafa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 6px;
+    }
+
+    .history-item {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+        padding: 6px;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+
+    .text-muted {
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    /* Search bar */
+    .search-box {
+        margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+</style>
+
+
+<div class="whatsapp-settings">
+    <div class="settings-container">
+
+        <!-- Header -->
+        <div class="settings-header">
+            <div>
+                <h1 class="settings-title">WhatsApp Settings</h1>
+                <p class="settings-subtitle">Manage your number and send messages with attachments</p>
+            </div>
+            <a href="{{ url_for('main.dashboard') }}" class="btn-back">← Back to Dashboard</a>
+        </div>
+
+        <!-- WhatsApp Number -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h2 class="card-title">My WhatsApp Number</h2>
+            </div>
+            <form action="{{ url_for('whatsapp.whatsapp_settings') }}" method="POST" class="card-body">
+                <label class="form-label">WhatsApp Number</label>
+                <input type="text" name="whatsapp_number" class="form-control" value="{{ whatsapp_number }}" required>
+                <div style="margin-top:1rem;">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contacts -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h2 class="card-title">Contacts</h2>
+            </div>
+            <div class="card-body">
+
+                <!-- 🔍 Search Bar -->
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search company name...">
+                </div>
+
+                <div id="contactList">
+                {% for c in contacts %}
+                <div class="contact-item" data-company="{{ c.company_name|lower }}">
+                    <!-- Collapsible Header -->
+                    <div class="contact-header" onclick="toggleContact('{{ c.id }}')">
+                        {{ c.company_name }}
+                        <span>▼</span>
+                    </div>
+
+                    <!-- Hidden Details -->
+                    <div class="contact-details" id="contact-{{ c.id }}">
+                        <div class="contact-info">
+                            <p><strong>Contact:</strong> {{ c.contact or '-' }}</p>
+                            <p><strong>Phone:</strong> {{ c.phone_number or '-' }}</p>
+                            <p><strong>Location:</strong> {{ c.location or '-' }}</p>
+                        </div>
+
+                        <form action="{{ url_for('whatsapp.send_message', contact_id=c.id) }}" method="POST" enctype="multipart/form-data">
+                            <textarea name="message" class="form-control" placeholder="Type message" required></textarea>
+                            <input type="file" name="attachment" class="form-control" style="margin-top:8px;">
+                            <button type="submit" class="btn btn-success" style="margin-top:8px;">Send</button>
+                        </form>
+
+                        <!-- Message History -->
+                        <div class="message-history">
+                            <button class="btn-toggle" type="button" onclick="toggleHistory('{{ c.id }}')">Show History ▼</button>
+                            <div id="history-{{ c.id }}" class="history-content" style="display:none;">
+                                {% if c.messages %}
+                                    {% for msg in c.messages %}
+                                        <div class="history-item">
+                                            <strong>{{ msg.date.strftime('%Y-%m-%d %H:%M') }}</strong>: {{ msg.content }}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="history-item text-muted">No previous messages.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function toggleContact(id) {
+    const el = document.getElementById("contact-" + id);
+    el.style.display = (el.style.display === "none" || el.style.display === "") 
+                        ? "block" 
+                        : "none";
+}
+
+function toggleHistory(id) {
+    const el = document.getElementById("history-" + id);
+    el.style.display = (el.style.display === "none" || el.style.display === "") 
+                        ? "block" 
+                        : "none";
+}
+
+/* 🔍 Search & reorder contacts */
+document.getElementById("searchInput").addEventListener("input", function() {
+    const searchValue = this.value.toLowerCase();
+    const contactList = document.getElementById("contactList");
+    const contacts = Array.from(contactList.getElementsByClassName("contact-item"));
+
+    // Separate matches and non-matches
+    const matches = [];
+    const others = [];
+
+    contacts.forEach(contact => {
+        const company = contact.getAttribute("data-company");
+        if (company.includes(searchValue) && searchValue !== "") {
+            matches.push(contact);
+            contact.style.display = "block";
+        } else if (searchValue === "") {
+            contact.style.display = "block";
+            others.push(contact);
+        } else {
+            others.push(contact);
+            contact.style.display = "none";
+        }
+    });
+
+    // Reorder: matched contacts first
+    contactList.innerHTML = "";
+    matches.forEach(m => contactList.appendChild(m));
+    others.forEach(o => contactList.appendChild(o));
+});
+</script>
+{% endblock %}
