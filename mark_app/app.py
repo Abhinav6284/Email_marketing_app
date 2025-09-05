@@ -921,26 +921,51 @@ def dashboard():
             subject = form_data.get('subject')
             message = form_data.get('message')
 
+            # Handle file attachments
+            attachment_files = []
+            attachment_names = []
+            uploaded_file = request.files.get('attachments')
+            
+            if uploaded_file and uploaded_file.filename != '':
+                # Read file data
+                file_data = uploaded_file.read()
+                file_name = uploaded_file.filename
+                file_type = uploaded_file.content_type or 'application/octet-stream'
+                
+                # Prepare for email service (expects list of tuples)
+                attachment_files = [(file_data, file_name, file_type)]
+                attachment_names.append(file_name)
+
             # This logic sets the Reply-To address correctly
             reply_address = None
             if current_user.use_custom_smtp and current_user.smtp_email:
                 reply_address = current_user.smtp_email
 
             campaign = Campaign(
-                user_id=uid, subject=subject, message=message, recipient_count=len(
-                    contacts_to_send)
+                user_id=uid, 
+                subject=subject, 
+                message=message, 
+                recipient_count=len(contacts_to_send),
+                attachments=', '.join(attachment_names) if attachment_names else None
             )
             db.session.add(campaign)
 
             sent, failed = 0, 0
             for contact in contacts_to_send:
-                # Note the corrected 'reply_to_addr' argument
-                success, error_msg = send_email(contact.email, subject, message, user=current_user,
-                                                reply_to_addr=reply_address)
+                # Include attachments in email sending
+                success, error_msg = send_email(
+                    contact.email, 
+                    subject, 
+                    message, 
+                    files=attachment_files if attachment_files else None,
+                    user=current_user,
+                    reply_to_addr=reply_address
+                )
                 if success:
                     sent += 1
                 else:
                     failed += 1
+                    print(f"Failed to send email to {contact.email}: {error_msg}")
 
             campaign.success_count = sent
             campaign.failed_count = failed
