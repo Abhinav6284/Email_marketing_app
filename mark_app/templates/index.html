@@ -1,0 +1,505 @@
+{% extends 'base.html' %}
+{% block title %}Mark - Creative Email Marketing{% endblock %}
+
+{% block head %}
+<style>
+/* --- Global Font Family & Base Styling --- */
+body, html {
+    font-family: 'Poppins', 'Montserrat', 'Lato', sans-serif;
+    color: #E5E5E5; /* light gray for premium contrast */
+  
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Aurora Background & Grid Overlay - Red Tint */
+.main-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.main-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(229, 9, 20, 0.25), transparent),
+                      radial-gradient(ellipse 80% 80% at 80% 50%, rgba(255, 105, 97, 0.15), transparent),
+                      radial-gradient(ellipse 80% 80% at 20% 50%, rgba(229, 9, 20, 0.15), transparent);
+    animation: aurora 15s linear infinite;
+    z-index: -2;
+}
+
+
+/* Header & Navigation */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 0;
+    z-index: 1000;
+    transition: background 0.3s ease, border-bottom 0.3s ease;
+}
+
+.header.scrolled {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 50px;
+    height: auto;
+}
+
+.nav-brand-text {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #E5E5E5;
+}
+
+.nav-links a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    margin-left: 28px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #E50914;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #E50914, #FF2D2D);
+    color: #fff;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(229, 9, 20, 0.6);
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 24px;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    background: linear-gradient(180deg, #FFFFFF 60%, #E50914);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    max-width: 600px;
+    margin: 0 auto 32px auto;
+}
+
+/* Section Styling */
+.section-wrapper {
+    max-width: 1200px;
+    margin: 150px auto;
+    padding: 0 24px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-title {
+    font-size: 36px;
+    color: #E5E5E5;
+}
+
+.section-subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    max-width: 600px;
+    margin: 16px auto 0;
+}
+
+/* Features Section */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 32px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(229,9,20,0.5);
+}
+
+.feature-icon {
+    font-size: 28px;
+    margin-bottom: 18px;
+}
+
+.feature-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.feature-description {
+    color: rgba(255,255,255,0.7);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* Pricing Section */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    align-items: center;
+}
+
+.pricing-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-card.popular {
+    transform: scale(1.05);
+    border-color: #E50914;
+    box-shadow: 0 15px 30px rgba(229,9,20,0.5);
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px) scale(1.02);
+}
+
+.plan-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.plan-price {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.plan-price span {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 28px 0;
+    text-align: left;
+}
+
+.plan-features li {
+    margin-bottom: 10px;
+}
+
+/* CTA Section */
+.cta-card {
+    background: linear-gradient(135deg, #E50914, #FF2D2D);
+    padding: 50px 20px;
+    text-align: center;
+    border-radius: 16px;
+    color: white;
+    max-width: 900px;
+    margin: auto;
+}
+
+.cta-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+}
+
+.cta-card p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    padding: 14px 30px;
+    font-size: 0.95rem;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #333;
+}
+
+/* Footer */
+.footer {
+    padding: 50px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 100px;
+    color: rgba(255,255,255,0.6);
+}
+
+.footer p {
+    font-size: 13px;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <header class="header" id="mainHeader">
+        <nav class="nav-container">
+            <a href="{{ url_for('main.index') }}" class="nav-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Connect Leads Logo" class="nav-logo">
+                <span class="nav-brand-text">Connect Leads</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#use-cases">Use Cases</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#testimonials">Testimonials</a>
+                <a href="{{ url_for('main.login') }}">Login</a>
+            </div>
+            <a href="{{ url_for('main.register') }}" class="btn btn-primary">Get Started Free</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content reveal">
+                <h1 class="hero-title">Connect, Engage & Close Clients Effortlessly</h1>
+                <p class="hero-subtitle">Reach your clients via Email and WhatsApp, automate follow-ups, and boost conversions with Connect Leads.</p>
+                <a href="{{ url_for('main.register') }}" class="btn btn-primary" style="padding: 14px 28px; font-size: 18px;">Start Your Free Trial</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="section-wrapper reveal" id="features">
+            <div class="section-header">
+                <h2 class="section-title">Everything You Need to <span class="text-gradient">Grow Your Client Base</span></h2>
+                <p class="section-subtitle">Connect Leads provides a suite of tools to engage clients and close deals efficiently.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📧</div>
+                    <h3 class="feature-title">Email Marketing Automation</h3>
+                    <p class="feature-description">Send personalized email campaigns at scale, track performance, and generate leads automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">WhatsApp Integration</h3>
+                    <p class="feature-description">Reach clients directly on WhatsApp, manage conversations, and send messages in bulk—all from one platform.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Smart Lead Management</h3>
+                    <p class="feature-description">Organize and track leads, schedule follow-ups, and prioritize high-value clients for faster conversions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">Get insights on campaign performance, open rates, clicks, and client engagement to make data-driven decisions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">Automation Workflows</h3>
+                    <p class="feature-description">Set up automated sequences for nurturing leads, following up, and sending reminders—without lifting a finger.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3 class="feature-title">CRM & API Integrations</h3>
+                    <p class="feature-description">Connect with your existing tools, CRM, and platforms to unify client communication seamlessly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases Section -->
+        <section class="section-wrapper reveal" id="use-cases">
+            <div class="section-header">
+                <h2 class="section-title">Who Can Benefit from <span class="text-gradient">Connect Leads</span>?</h2>
+                <p class="section-subtitle">From small businesses to enterprises, our platform is built to help anyone close more deals and grow faster.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏢</div>
+                    <h3 class="feature-title">Small Businesses</h3>
+                    <p class="feature-description">Reach new customers, nurture leads, and increase sales without hiring a large marketing team.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💼</div>
+                    <h3 class="feature-title">Sales Teams</h3>
+                    <p class="feature-description">Organize leads, send bulk emails and WhatsApp messages, and track conversions efficiently.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Marketing Agencies</h3>
+                    <p class="feature-description">Manage campaigns for multiple clients, monitor performance, and deliver measurable results.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="section-wrapper reveal" id="pricing">
+            <div class="section-header">
+                <h2 class="section-title">Simple, <span class="text-gradient">Transparent</span> Pricing</h2>
+                <p class="section-subtitle">Select a plan that scales with your outreach. No hidden fees.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3 class="plan-name">Starter</h3>
+                    <div class="plan-price">$100<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 1,000 Emails/Month</li>
+                        <li>✓ WhatsApp Messaging</li>
+                        <li>✓ Basic Templates</li>
+                        <li>✓ Community Support</li>
+                    </ul>
+                    <a href="{{ url_for('main.register') }}" class="btn" style="width: 100%;">Get Started</a>
+                </div>
+                <div class="pricing-card popular">
+                    <h3 class="plan-name">Pro</h3>
+                    <div class="plan-price">$230<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 25,000 Emails/Month</li>
+                        <li>✓ WhatsApp Broadcasts & Automation</li>
+                        <li>✓ Advanced Analytics & A/B Testing</li>
+                        <li>✓ Priority Support</li>
+                    </ul>
+                    <a href="{{ url_for('main.register') }}" class="btn btn-primary" style="width: 100%;">Choose Pro</a>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="plan-name">Enterprise</h3>
+                    <div class="plan-price">$900<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 100,000 Emails/Month</li>
+                        <li>✓ Full WhatsApp CRM Integration</li>
+                        <li>✓ Automation Workflows</li>
+                        <li>✓ Dedicated Account Manager</li>
+                    </ul>
+                    <a href="{{ url_for('main.register') }}" class="btn" style="width: 100%;">Contact Sales</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="section-wrapper reveal" id="testimonials">
+            <div class="section-header">
+                <h2 class="section-title">What Our Clients <span class="text-gradient">Say</span></h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌟</div>
+                    <p class="feature-description">"Connect Leads transformed the way we communicate with clients. Email and WhatsApp integration saved us hours every week!" – Sarah M., Marketing Manager</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌟</div>
+                    <p class="feature-description">"The platform’s automation workflows helped our sales team close deals faster than ever. Highly recommended!" – John D., Sales Director</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌟</div>
+                    <p class="feature-description">"Managing multiple client campaigns is now effortless. The analytics dashboard is a game-changer." – Priya K., Agency Owner</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="section-wrapper reveal">
+            <div class="cta-card">
+                <h2 class="section-title" style="font-size: 36px;">Ready to Close More Deals?</h2>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">Join thousands of businesses using Connect Leads to engage clients and grow faster.</p>
+                <a href="{{ url_for('main.register') }}" class="btn" style="background-color: #000; color: #fff; padding: 14px 28px; font-size: 18px; margin-top: 20px;">Start Free Today</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer reveal">
+        <p>&copy; {{ current_year }} Connect Leads. All rights reserved.</p>
+    </footer>
+</div>
+
+
+<script>
+    // Header scroll effect
+    const header = document.getElementById('mainHeader');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+</script>
+{% endblock %}
