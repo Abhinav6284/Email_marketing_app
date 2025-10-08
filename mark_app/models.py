@@ -33,13 +33,14 @@ class User(UserMixin, db.Model):
     whatsapp_auth_token = db.Column(db.String(500), nullable=True)
     whatsapp_number = db.Column(db.String(50), nullable=True)
     whatsapp_verified = db.Column(db.Boolean, default=False)
-    
+
     # WhatsApp Integration Types
-    whatsapp_integration_type = db.Column(db.String(50), default='personal')  # personal, twilio, business
+    whatsapp_integration_type = db.Column(
+        db.String(50), default='personal')  # personal, twilio, business
     whatsapp_business_token = db.Column(db.String(500), nullable=True)
     whatsapp_business_phone_id = db.Column(db.String(100), nullable=True)
     whatsapp_business_app_id = db.Column(db.String(100), nullable=True)
-    
+
     # Additional signup fields as requested
     mobile_number = db.Column(db.String(20), nullable=True)
     company_address = db.Column(db.Text, nullable=True)
@@ -84,7 +85,7 @@ class Contact(db.Model):
     date = db.Column(db.Date, nullable=False)
     company_name = db.Column(db.String(200), nullable=False)
     contact = db.Column(db.String(100))
-    email = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=True)
     location = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     phone_number = db.Column(db.String(20))
@@ -100,12 +101,14 @@ class Campaign(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     subject = db.Column(db.String(255), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    sent_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    sent_at = db.Column(
+        db.DateTime, default=lambda: datetime.now(timezone.utc))
     recipient_count = db.Column(db.Integer, default=0)
     success_count = db.Column(db.Integer, default=0)
     failed_count = db.Column(db.Integer, default=0)
     attachments = db.Column(db.String(500))
     message_id = db.Column(db.String(255), unique=True)   # ✅ NEW
+
 
 class EmailReply(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -116,7 +119,8 @@ class EmailReply(db.Model):
     body = db.Column(db.Text)
     received_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc))
-    
+
+
 class MessageHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contact_id = db.Column(db.Integer, db.ForeignKey('contact.id'))
